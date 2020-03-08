@@ -1,10 +1,11 @@
 # zabbix-topdesk
-This zabbix webhook script will create or close Topdesk incidents based on triggers. 
+This zabbix webhook script will create or close Topdesk incidents based on triggers.
 
 To get this to work you'll need to do the following steps:
 * Create a Topdesk user and enable it for API access
 * Create Zabbix mediatype by importing the xml
-* Fill in the gap's: parameters for the media action and enable a trigger receiving zabbix user to use it.
+* Fill in the gaps: parameters for the media action and enable a trigger receiving zabbix user to use it.
+
 
 
 # Topdesk
@@ -57,35 +58,38 @@ This should return a last of the last 20 incidents.
 
 
 
-# Zabbix Webhook Notifications
+# Zabbix
+### information
 See: https://www.zabbix.com/documentation/current/manual/config/notifications/media/webhook
 
-You can either create the webhook yourself, paste the script, create the parameters of import the XML.
+### Create a Mediatype of type 'webhook'
+You can either create the webhook yourself, paste the script and create the parameters or import the XML.
+
 
 * From the Zabbix webinterface, choose Administration > Media types.
-* Import > choose topdesk-incident-triggers.xml
-* Adjust the media type for your environment, edit Topdesk Media type
-Parameters:
+  - Import > choose topdesk-incident-triggers.xml
+  - Now adjust the media type for your environment and edit the new Topdesk mediatype
+* Parameters:
 - required params:
   - authentication: base64 encoded <user>:<appkey>
   - urlAPI: Base URL Topdesk API: https://<company>.topdesk.net/tas/api
   - eventvalue: {EVENT.VALUE}
   - eventupdate: {EVENT.UPDATE.STATUS}
 
-- parameters used during creation of incidents (eventvalue=1/eventupdate=0):
+*- parameters used during creation of incidents (eventvalue=1/eventupdate=0):
   - briefDescription: {ALERT.SUBJECT}
   - request: {ALERT.MESSAGE}
   - callerExternal: If filled this will be used as the caller for the incident. No Topdesk check on this field.
   - callerEmail: if callerExternal is blank, the callerEmail has to be filled with a valid Topdesk enabled email adres.
   - operator: id of operator
   - operatorGroup: id of operator group
-  >> at least an operator group id must be supplied. Retrieve it with curl API test!
+    *at least an operator group id must be supplied. Find it in the results of the curl API test!*
   
-- parameters used on close (eventvalue=0/eventupdate=1)
+* parameters used on close (eventvalue=0/eventupdate=1)
   - incident_id: {EVENT.TAGS.incident_id}
-    Event tag is created during initial incident creation and retrieved from Topdesk. Used for updates on incident
+    *Event tag is created during initial incident creation and retrieved from Topdesk. Used for updates on incident*
 
-- returned values in TAGS:
+* returned values in TAGS:
   - create:
     incident_id
     incident_nr
