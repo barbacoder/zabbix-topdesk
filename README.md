@@ -96,3 +96,4 @@ From the Zabbix webinterface, choose Administration > Media types.
 I still have to figure out the menu entry name and URL. It should be possible to generate a direct user
 accessible URL to the incident.  
     
+### Use this mediatype on an alerting user
