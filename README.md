@@ -46,6 +46,7 @@ Now it is time to the API Access to Topdesk. We need a base64 encoded userid and
 
 Now retrieve json list of last incidents 
 *  curl -v -H "Authorization: Basic emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt" -H "Accept: application/json" -H "Content-Type: application/json -X GET https://company.topdesk.net/tas/api/incidents
+
 This should return a last of the last 20 incidents.
 
 
@@ -56,34 +57,32 @@ See: https://www.zabbix.com/documentation/current/manual/config/notifications/me
 You can either create the webhook yourself, paste the script, create the parameters of import the XML.
 
 * From the Zabbix webinterface, choose Administration > Media types.
-
 * Import > choose topdesk-incident-triggers.xml
-
 * Adjust the media type for your environment, edit Topdesk Media type
 Parameters:
   required params:
-	- authentication: base64 encoded <user>:<appkey>
-	- urlAPI: Base URL Topdesk API: https://<company>.topdesk.net/tas/api
-	- eventvalue: {EVENT.VALUE}
-	- eventupdate: {EVENT.UPDATE.STATUS}
+  - authentication: base64 encoded <user>:<appkey>
+  - urlAPI: Base URL Topdesk API: https://<company>.topdesk.net/tas/api
+  - eventvalue: {EVENT.VALUE}
+  - eventupdate: {EVENT.UPDATE.STATUS}
 
   parameters used during creation of incidents (eventvalue=1/eventupdate=0):
-	- briefDescription: {ALERT.SUBJECT}
-	- request: {ALERT.MESSAGE}
+  - briefDescription: {ALERT.SUBJECT}
+  - request: {ALERT.MESSAGE}
   - callerExternal: If filled this will be used as the caller for the incident. No Topdesk check on this field.
   - callerEmail: if callerExternal is blank, the callerEmail has to be filled with a valid Topdesk enabled email adres.
-	- operator: id of operator
-	- operatorGroup: id of operator group
-	>> at least an operator group id must be supplied. Retrieve it with curl API test!
+  - operator: id of operator
+  - operatorGroup: id of operator group
+  >> at least an operator group id must be supplied. Retrieve it with curl API test!
+  
+  parameters used on close (eventvalue=0/eventupdate=1)
+  - incident_id: {EVENT.TAGS.incident_id}
+    Event tag is created during initial incident creation and retrieved from Topdesk. Used for updates on incident
 
- parameters used on close (eventvalue=0/eventupdate=1)
-	- incident_id: {EVENT.TAGS.incident_id}
-		Event tag is created during initial incident creation and retrieved from Topdesk. Used for updates on incident
-
- returned values in TAGS:
-	create:
-		- incident_id
-		- incident_nr
+  returned values in TAGS:
+    create:
+    - incident_id
+    - incident_nr
     
 I still have to figure out the menu entry name and URL. It should be possible to generate a direct user
 accessible URL to the incident.  
