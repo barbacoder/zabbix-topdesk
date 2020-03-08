@@ -45,11 +45,7 @@ Now it is time to the API Access to Topdesk. We need a base64 encoded userid and
   emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt
 
 Now retrieve json list of last incidents 
-  curl -v -H "Authorization: Basic emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt"  \
-    -H "Accept: application/json"  \
-    -H "Content-Type: application/json" \
-    -X GET \
-    https://company.topdesk.net/tas/api/incidents
+*  curl -v -H "Authorization: Basic emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt" -H "Accept: application/json" -H "Content-Type: application/json -X GET https://company.topdesk.net/tas/api/incidents
 This should return a last of the last 20 incidents.
 
 
@@ -59,10 +55,11 @@ See: https://www.zabbix.com/documentation/current/manual/config/notifications/me
 
 You can either create the webhook yourself, paste the script, create the parameters of import the XML.
 
-From the Zabbix webinterface, choose Administration > Media types.
-- Import > choose topdesk-incident-triggers.xml
+* From the Zabbix webinterface, choose Administration > Media types.
 
-Adjust the media type for your environment, edit Topdesk Media type
+* Import > choose topdesk-incident-triggers.xml
+
+* Adjust the media type for your environment, edit Topdesk Media type
 Parameters:
   required params:
 	- authentication: base64 encoded <user>:<appkey>
