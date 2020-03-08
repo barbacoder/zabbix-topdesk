@@ -1,5 +1,5 @@
-# zabbix-topdesk
-This zabbix webhook script will create or close Topdesk incidents based on triggers.
+# Zabbix Topdesk Mediatype
+This zabbix mediatype will create or close Topdesk incidents based on triggers. You'll find a xml for importing the mediatype as well as the seperate script which handles the Topdesk API calls.
 
 To get this to work you'll need to do the following steps:
 * Create a Topdesk user and enable it for API access
