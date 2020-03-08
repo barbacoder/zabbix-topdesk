@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-03-08T15:32:33Z</date>
+    <media_types>
+        <media_type>
+            <name>Topdesk</name>
+            <type>WEBHOOK</type>
+            <parameters>
+                <parameter>
+                    <name>authentication</name>
+                    <value>base64 userid:apipasswd</value>
+                </parameter>
+                <parameter>
+                    <name>urlApi</name>
+                    <value>https://company.topdesk.net/tas/api</value>
+                </parameter>
+                <parameter>
+                    <name>eventvalue</name>
+                    <value>{EVENT.VALUE}</value>
+                </parameter>
+                <parameter>
+                    <name>eventupdate</name>
+                    <value>{EVENT.UPDATE.STATUS}</value>
+                </parameter>
+                <parameter>
+                    <name>briefDescription</name>
+                    <value>{ALERT.SUBJECT}</value>
+                </parameter>
+                <parameter>
+                    <name>request</name>
+                    <value>{ALERT.MESSAGE}</value>
+                </parameter>
+                <parameter>
+                    <name>callerExternal</name>
+                    <value>Zabbix Monitoring</value>
+                </parameter>
+                <parameter>
+                    <name>callerEmail</name>
+                    <value/>
+                </parameter>
+                <parameter>
+                    <name>operator</name>
+                    <value/>
+                </parameter>
+                <parameter>
+                    <name>operatorGroup</name>
+                    <value>ID retrieved with curk API test</value>
+                </parameter>
+                <parameter>
+                    <name>incident_id</name>
+                    <value>{EVENT.TAGS.incident_id}</value>
+                </parameter>
+                <parameter>
+                    <name>urlUser</name>
+                    <value>Not implemented: base url user access tot incident</value>
+                </parameter>
+            </parameters>
+            <script>/* Script to manage zabbix triggerd Topdesk incidents&#13;
+&#13;
+ required params:&#13;
+	- authentication: base64 encoded &lt;user&gt;:&lt;appkey&gt;&#13;
+	- urlAPI: Base URL Topdesk API: https://&lt;company&gt;.topdesk.net/tas/api&#13;
+	- eventvalue: {EVENT.VALUE}&#13;
+	- eventupdate: {EVENT.UPDATE.STATUS}&#13;
+&#13;
+ create (eventvalue=1/eventupdate=0):&#13;
+	- briefDescription: {ALERT.SUBJECT}&#13;
+	- request: {ALERT.MESSAGE}&#13;
+	- operator: id of operator&#13;
+	- operatorGroup: id of opertaor group&#13;
+	&gt;&gt; at least an operator group id must be supplied. Retrieve it with curl API test!&#13;
+	&#13;
+ close (eventvalue=0/eventupdate=1)&#13;
+	- incident_id: {EVENT.TAGS.incident_id}&#13;
+		Event tag is created during initial incident creation and retrieved from Topdesk. Used for updates on incident&#13;
+&#13;
+ returned values:&#13;
+		create:&#13;
+		- incident_id&#13;
+		- incident_nr&#13;
+&#13;
+*/&#13;
+try {&#13;
+&#13;
+&#13;
+	Zabbix.Log(3, 'Topdesk incident notification start');  &#13;
+&#13;
+    var result = {tags: {}},&#13;
+    params = JSON.parse(value),&#13;
+    req = new CurlHttpRequest(),&#13;
+    fields = {},&#13;
+    urlApi = params.urlApi;&#13;
+  &#13;
+	req.AddHeader('Content-Type: application/json');&#13;
+	req.AddHeader('Accept: application/json');&#13;
+	req.AddHeader('Authorization: Basic '+params.authentication);&#13;
+  &#13;
+&#13;
+	if ((params.eventvalue == 1) &amp;&amp; (params.eventupdate == 0)) {&#13;
+        Zabbix.Log(3, 'Topdesk incident notification create incident');  &#13;
+&#13;
+        urlApi = urlApi+&quot;/incidents&quot; &#13;
+        fields.briefDescription = params.briefDescription;&#13;
+        fields.request = params.request;&#13;
+    	&#13;
+    	if (params.callerExternal.length &gt; 0) {&#13;
+    		fields.caller =  { &quot;dynamicName&quot;: params.callerExternal };&#13;
+    	} &#13;
+    	else { fields.callerLookup =  { &quot;email&quot;: params.callerEmail }; }&#13;
+&#13;
+		if (params.operator.length &gt;0) { &#13;
+			fields.operator = {&quot;id&quot;: params.operator }; &#13;
+		}&#13;
+		if (fields.operatorGroup &gt; 0) { &#13;
+			fields.operatorGroup = {&quot;id&quot;: params.operator_group };&#13;
+		}		&#13;
+&#13;
+        var resp = req.Post(urlApi, JSON.stringify(fields));&#13;
+		if (req.Status() != 201) {&#13;
+        		throw 'Response code: '+req.Status();&#13;
+        } &#13;
+        else {&#13;
+        	resp = JSON.parse(resp);&#13;
+ 		  	result.tags.incident_id = resp.id;&#13;
+	  		result.tags.incident_nr = resp.number;&#13;
+	  	}&#13;
+    }&#13;
+    else if ((params.eventvalue == 1) &amp;&amp; (params.eventupdate == 1)) {&#13;
+		Zabbix.Log(3, 'Topdesk incident notification Ack - not implemented');  &#13;
+    }&#13;
+    else if (params.eventvalue == 0) {&#13;
+		Zabbix.Log(3, 'Topdesk incident notification close');  &#13;
+        &#13;
+        urlApi = urlApi+&quot;/incidents/id/&quot;+params.incident_id &#13;
+        fields.closed = &quot;true&quot;;&#13;
+        fields.action = &quot;Dit incident is opgelost&quot;;&#13;
+        &#13;
+        var resp = req.Put(urlApi, JSON.stringify(fields))&#13;
+		if (req.Status() != 200) {&#13;
+        		throw 'Response code: '+req.Status();&#13;
+        }       &#13;
+    }&#13;
+} &#13;
+catch (error) {&#13;
+	Zabbix.Log(3, 'Topdesk incident notification failed json: '+JSON.stringify(fields));&#13;
+	Zabbix.Log(3, 'Topdesk incident notification failed resp: '+resp);&#13;
+	Zabbix.Log(3, 'Topdesk incident notification failed : '+error);&#13;
+    throw 'Topdesk incident notification failed : '+error;&#13;
+&#13;
+    result = {};&#13;
+}&#13;
+&#13;
+return JSON.stringify(result);</script>
+            <process_tags>YES</process_tags>
+            <event_menu_url>https://compant.topdesk.net/{EVENT.TAGS.incident_id}</event_menu_url>
+            <event_menu_name>{EVENT.TAGS.incident_nr}</event_menu_name>
+            <description>Creates Topdesk incidents on triggers&#13;
+Parameters&#13;
+&#13;
+Required:&#13;
+- authentication: base64 encoded &lt;user&gt;:&lt;appkey&gt;&#13;
+- urlAPI: Base URL Topdesk API: https://&lt;company&gt;.topdesk.net/tas/api&#13;
+- eventvalue: {EVENT.VALUE}&#13;
+- eventupdate: {EVENT.UPDATE.STATUS}&#13;
+On create (eventvalue=1/eventupdate=0):&#13;
+- briefDescription: {ALERT.SUBJECT}&#13;
+- request: {ALERT.MESSAGE}&#13;
+- incident_id: {EVENT.TAGS.incident_id}&#13;
+	Event tag is created during initial incident creation and retrieved from Topdesk. Used for updates on incident&#13;
+- operator: id of operator&#13;
+- operatorGroup: id of opertaor group&#13;
+&gt;&gt; at least an operator group id must be supplied. Retrieve it with curl API test!&#13;
+&#13;
+&#13;
+On close (eventvalue=0/eventupdate=1)&#13;
+- incident_id: {EVENT.TAGS.incident_id}&#13;
+&gt;&gt; Event tag is created during initial incident creation and retrieved from Topdesk. Used for updates on incident&#13;
+&#13;
+Returned values in TAGS:&#13;
+On create:&#13;
+- incident_id&#13;
+- incident_nr&#13;
+</description>
+        </media_type>
+    </media_types>
+</zabbix_export>
