@@ -14,25 +14,25 @@ To get this to work you'll need to do the following steps:
 
 ### Create a permission group for API access
 * Modules > Supporting files > Permissiongroup > Create group ‘API Access first line call management’
-  * Section Reporting API:
-    API > Rest API: read
-      Use Application password
-  * Section Call Management (can also be done with seperate group), for example
-    First line calls
-      Read/Write/Create
-      Close calls
+* Section Reporting API:
+- API > Rest API: 
+  - read
+  - Use Application password
+* Section Call Management (can also be done with seperate group), for example
+- First line calls
+  - Read/Write/Create
+  - Close calls
 ### Create an operator for use by the zabbix webhook
-  Modules > Supporting files > Operators > Create Operator
-    Surname
-    (Location)
-    Authorization
-    +group: API Access first line call management
-    Operator group
-    +group: existing operator group
-    Topdesk Login
-      username: zabbix, set password!
-    Login permission
-    Set Application password
+* Modules > Supporting files > Operators > Create Operator
+- Surname
+- (Location)
+- Authorization
+  - +group: API Access first line call management
+  - Operator group
+  - +group: existing operator group
+  - Topdesk Login: username: zabbix, set password!
+  - Login permission
+  - Set Application password
 
 ### Login with the newly created operator acount on Topdesk web interface
 * User menu > settings > Application password > Add
@@ -46,7 +46,7 @@ Now it is time to the API Access to Topdesk. We need a base64 encoded userid and
 * echo -n zabbix:1a2bc-34de5-6fg78-hi90j-k12lm | base64
   (emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt
 
-Now retrieve json list of last incidents 
+### Now retrieve json list of last incidents 
 *  curl -v -X GET \
 -H "Authorization: Basic emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt" \
 -H "Accept: application/json" \
