@@ -39,18 +39,20 @@ Now login with the newly created operator acount on Topdesk web interface
     Choose application name and expiration date
     Copy generated application password! 
 
-No it is time to the API Access to Topdesk. We need a base64 encoded userid and key string. 
-  # base64 encode <userid>:<application key>
-  # echo -n zabbix:1a2bc-34de5-6fg78-hi90j-k12lm | base64
-    emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt
+Now it is time to the API Access to Topdesk. We need a base64 encoded userid and key string. 
+  base64 encode <userid>:<application key>
+  echo -n zabbix:1a2bc-34de5-6fg78-hi90j-k12lm | base64
+  emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt
 
 Now retrieve json list of last incidents 
-  # curl -v -H "Authorization: Basic emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt"  \
+  curl -v -H "Authorization: Basic emFiYml4OjFhMmJjLTM0ZGU1LTZmZzc4LWhpOTBqLWsxMmxt"  \
     -H "Accept: application/json"  \
     -H "Content-Type: application/json" \
     -X GET \
     https://company.topdesk.net/tas/api/incidents
 This should return a last of the last 20 incidents.
+
+
 
 # Zabbix Webhook Notifications
 See: https://www.zabbix.com/documentation/current/manual/config/notifications/media/webhook
